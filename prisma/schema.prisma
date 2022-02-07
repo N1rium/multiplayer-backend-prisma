@@ -1,0 +1,55 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider          = "postgresql"
+  url               = env("DATABASE_URL")
+  shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
+}
+
+model User {
+  id               Int                @id @default(autoincrement())
+  email            String             @unique
+  username         String
+  salt             String
+  password         String
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  MatchParticipant MatchParticipant[]
+}
+
+model Game {
+  id        Int      @id @default(autoincrement())
+  name      String
+  slug      String   @unique
+  createdAt DateTime @default(now())
+  matches   Match[]
+}
+
+model Match {
+  id           Int                @id @default(autoincrement())
+  mode         MatchMode          @default(CASUAL)
+  game         Game               @relation(fields: [gameId], references: [id])
+  gameId       Int
+  createdAt    DateTime           @default(now())
+  participants MatchParticipant[]
+}
+
+model MatchParticipant {
+  user    User    @relation(fields: [userId], references: [id])
+  userId  Int
+  match   Match   @relation(fields: [matchId], references: [id])
+  matchId Int
+  winner  Boolean
+
+  @@id([userId, matchId])
+}
+
+enum MatchMode {
+  CASUAL
+  RANKED
+}
