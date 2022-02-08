@@ -1,4 +1,4 @@
-import { PrismaClient, Rarity } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 import titles from './seed-titles';
 const prisma = new PrismaClient();
 
