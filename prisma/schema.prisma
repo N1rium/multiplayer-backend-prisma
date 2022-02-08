@@ -19,6 +19,7 @@ model User {
   password         String
   createdAt        DateTime           @default(now())
   updatedAt        DateTime           @updatedAt
+  role             UserRole           @default(USER)
   MatchParticipant MatchParticipant[]
   TitlesOnUsers TitlesOnUsers[]
 }
@@ -78,4 +79,10 @@ enum Rarity {
 enum MatchMode {
   CASUAL
   RANKED
+}
+
+enum UserRole {
+  USER
+  MODERATOR
+  ADMIN
 }
