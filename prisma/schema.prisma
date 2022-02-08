@@ -20,6 +20,7 @@ model User {
   createdAt        DateTime           @default(now())
   updatedAt        DateTime           @updatedAt
   MatchParticipant MatchParticipant[]
+  TitlesOnUsers TitlesOnUsers[]
 }
 
 model Game {
@@ -47,6 +48,31 @@ model MatchParticipant {
   winner  Boolean
 
   @@id([userId, matchId])
+}
+
+model Title {
+  id  Int @id @default(autoincrement())
+  value String
+  rarity  Rarity  @default(COMMON)
+  TitlesOnUsers TitlesOnUsers[]
+}
+
+model TitlesOnUsers {
+  user  User  @relation(fields: [userId], references: [id])
+  userId  Int
+  title Title @relation(fields: [titleId], references: [id])
+  titleId Int
+  active  Boolean @default(false)
+
+  @@id([userId, titleId])
+}
+
+enum Rarity {
+  COMMON
+  UNCOMMON
+  RARE
+  EPIC
+  LEGENDARY
 }
 
 enum MatchMode {
