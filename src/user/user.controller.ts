@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 import { Title } from '@prisma/client';
 import { CreateUserDTO } from './dto/user-create.dto';
 import { UserPublic } from './dto/user-public.dto';
@@ -13,13 +13,25 @@ export class UserController {
     return this.service.create(data);
   }
 
+  @Get()
+  users(): Promise<UserPublic[]> {
+    return this.service.users({});
+  }
+
+  @Get('/:id')
+  user(@Param('id') id: string): Promise<UserPublic> {
+    return this.service.user({
+      id: +id,
+    });
+  }
+
   @Get('/:id/title')
-  title(@Param('id') id: number): Promise<Title> {
+  title(@Param('id') id: string): Promise<Title> {
     return this.service.title(id);
   }
 
   @Get('/:id/titles')
-  titles(@Param('id') id: number): Promise<Title[]> {
+  titles(@Param('id') id: string): Promise<Title[]> {
     return this.service.titles(id);
   }
 }

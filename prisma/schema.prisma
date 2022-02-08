@@ -24,19 +24,9 @@ model User {
   TitlesOnUsers TitlesOnUsers[]
 }
 
-model Game {
-  id        Int      @id @default(autoincrement())
-  name      String
-  slug      String   @unique
-  createdAt DateTime @default(now())
-  matches   Match[]
-}
-
 model Match {
   id           Int                @id @default(autoincrement())
   mode         MatchMode          @default(CASUAL)
-  game         Game               @relation(fields: [gameId], references: [id])
-  gameId       Int
   createdAt    DateTime           @default(now())
   participants MatchParticipant[]
 }
