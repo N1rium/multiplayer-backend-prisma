@@ -1,9 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { Prisma, Title } from '@prisma/client';
 import { PrismaService } from 'src/prisma.service';
 import { SecurityService } from 'src/security/security.service';
-import { CreateUserDTO } from './dto/user-create.dto';
+import { UserCreateDTO } from './dto/user-create.dto';
+import { UserLoginDTO } from './dto/user-login.dto';
 import { UserPublic } from './dto/user-public.dto';
+import * as jwt from 'jsonwebtoken';
 
 @Injectable()
 export class UserService {
@@ -12,7 +14,7 @@ export class UserService {
     private readonly crypto: SecurityService,
   ) {}
 
-  async create(data: CreateUserDTO): Promise<UserPublic> {
+  async create(data: UserCreateDTO): Promise<UserPublic> {
     const encrypted = this.crypto.saltHashPassword(data.password);
     const { salt, hash: password } = encrypted;
 
@@ -23,6 +25,33 @@ export class UserService {
         username: true,
       },
     });
+  }
+
+  async login(data: UserLoginDTO): Promise<string> {
+    const user = await this.prisma.user.findUnique({
+      where: { email: data.email },
+    });
+
+    if (!user) {
+      throw new UnauthorizedException();
+    }
+
+    const { salt, password: storedPassword } = user;
+    const encrypted = this.crypto.sha512(data.password, salt);
+
+    if (storedPassword !== encrypted.hash) {
+      throw new UnauthorizedException();
+    }
+
+    const token = jwt.sign(
+      {
+        username: user.username,
+        id: user.id,
+        role: user.role,
+      },
+      process.env.JWT_SECRET,
+    );
+    return token;
   }
 
   async users(params: {
