@@ -25,10 +25,12 @@ model User {
 }
 
 model Match {
-  id           Int                @id @default(autoincrement())
-  mode         MatchMode          @default(CASUAL)
-  createdAt    DateTime           @default(now())
-  participants MatchParticipant[]
+  id            Int                   @id @default(autoincrement())
+  mode          MatchMode             @default(CASUAL)
+  gameMode      GameMode              @relation(fields: [gameModeId], references: [id])
+  gameModeId    Int
+  createdAt     DateTime              @default(now())
+  participants  MatchParticipant[]
 }
 
 model MatchParticipant {
@@ -39,6 +41,13 @@ model MatchParticipant {
   winner  Boolean
 
   @@id([userId, matchId])
+}
+
+model GameMode {
+  id          Int       @id @default(autoincrement())
+  name        String
+  description String
+  Match       Match[]
 }
 
 model Title {
