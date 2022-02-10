@@ -1,5 +1,6 @@
 import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { Title } from '@prisma/client';
+import { TokenRes } from './dto/token-res.dto';
 import { UserCreateDTO } from './dto/user-create.dto';
 import { UserLoginDTO } from './dto/user-login.dto';
 import { UserPublic } from './dto/user-public.dto';
@@ -15,7 +16,7 @@ export class UserController {
   }
 
   @Post('/login')
-  login(@Body() data: UserLoginDTO): Promise<string> {
+  login(@Body() data: UserLoginDTO): Promise<TokenRes> {
     return this.service.login(data);
   }
 

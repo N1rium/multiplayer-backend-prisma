@@ -6,6 +6,7 @@ import { UserCreateDTO } from './dto/user-create.dto';
 import { UserLoginDTO } from './dto/user-login.dto';
 import { UserPublic } from './dto/user-public.dto';
 import * as jwt from 'jsonwebtoken';
+import { TokenRes } from './dto/token-res.dto';
 
 @Injectable()
 export class UserService {
@@ -27,7 +28,7 @@ export class UserService {
     });
   }
 
-  async login(data: UserLoginDTO): Promise<string> {
+  async login(data: UserLoginDTO): Promise<TokenRes> {
     const user = await this.prisma.user.findUnique({
       where: { email: data.email },
     });
@@ -51,7 +52,8 @@ export class UserService {
       },
       process.env.JWT_SECRET,
     );
-    return token;
+
+    return { token };
   }
 
   async users(params: {
