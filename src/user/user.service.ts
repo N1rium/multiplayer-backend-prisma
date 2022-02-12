@@ -1,12 +1,9 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { Prisma, Title } from '@prisma/client';
 import { PrismaService } from 'src/prisma.service';
 import { SecurityService } from 'src/security/security.service';
 import { UserCreateDTO } from './dto/user-create.dto';
-import { UserLoginDTO } from './dto/user-login.dto';
 import { UserPublic } from './dto/user-public.dto';
-import * as jwt from 'jsonwebtoken';
-import { TokenRes } from './dto/token-res.dto';
 
 @Injectable()
 export class UserService {
@@ -26,34 +23,6 @@ export class UserService {
         username: true,
       },
     });
-  }
-
-  async login(data: UserLoginDTO): Promise<TokenRes> {
-    const user = await this.prisma.user.findUnique({
-      where: { email: data.email },
-    });
-
-    if (!user) {
-      throw new UnauthorizedException();
-    }
-
-    const { salt, password: storedPassword } = user;
-    const encrypted = this.crypto.sha512(data.password, salt);
-
-    if (storedPassword !== encrypted.hash) {
-      throw new UnauthorizedException();
-    }
-
-    const token = jwt.sign(
-      {
-        username: user.username,
-        id: user.id,
-        role: user.role,
-      },
-      process.env.JWT_SECRET,
-    );
-
-    return { token };
   }
 
   async users(params: {
