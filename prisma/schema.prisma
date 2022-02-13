@@ -35,11 +35,14 @@ model Match {
 }
 
 model MatchParticipant {
-  user    User    @relation(fields: [userId], references: [id])
-  userId  Int
-  match   Match   @relation(fields: [matchId], references: [id])
-  matchId String
-  winner  Boolean
+  user          User                  @relation(fields: [userId], references: [id])
+  userId        Int
+  match         Match                 @relation(fields: [matchId], references: [id])
+  matchId       String
+  winner        Boolean
+  eloChange     Int?
+  createdAt     DateTime              @default(now())
+  updatedAt     DateTime              @updatedAt
 
   @@id([userId, matchId])
 }
