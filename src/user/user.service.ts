@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Prisma, Title } from '@prisma/client';
+import { Match, Prisma, Title } from '@prisma/client';
 import { PrismaService } from 'src/prisma.service';
 import { SecurityService } from 'src/security/security.service';
 import { UserCreateDTO } from './dto/user-create.dto';
@@ -52,6 +52,18 @@ export class UserService {
       select: {
         id: true,
         username: true,
+      },
+    });
+  }
+
+  async userMatches(id: string): Promise<Match[]> {
+    return this.prisma.match.findMany({
+      where: {
+        participants: {
+          every: {
+            userId: +id,
+          },
+        },
       },
     });
   }

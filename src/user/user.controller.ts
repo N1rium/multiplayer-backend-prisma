@@ -1,10 +1,12 @@
 import { Body, Controller, Get, Param, Post } from '@nestjs/common';
-import { Title } from '@prisma/client';
+import { ApiTags } from '@nestjs/swagger';
+import { Match, Title } from '@prisma/client';
 import { UserCreateDTO } from './dto/user-create.dto';
 import { UserPublic } from './dto/user-public.dto';
 import { UserService } from './user.service';
 
-@Controller('user')
+@Controller('users')
+@ApiTags('users')
 export class UserController {
   constructor(private readonly service: UserService) {}
 
@@ -23,6 +25,11 @@ export class UserController {
     return this.service.user({
       id: +id,
     });
+  }
+
+  @Get('/:id/matches')
+  userMatches(@Param('id') id: string): Promise<Match[]> {
+    return this.service.userMatches(id);
   }
 
   @Get('/:id/title')
