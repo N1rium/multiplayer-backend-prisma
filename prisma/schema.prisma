@@ -12,16 +12,16 @@ datasource db {
 }
 
 model User {
-  id               Int                @id @default(autoincrement())
-  email            String             @unique
-  username         String             @db.VarChar(25)	
-  salt             String
-  password         String
-  createdAt        DateTime           @default(now())
-  updatedAt        DateTime           @updatedAt
-  role             UserRole           @default(USER)
-  MatchParticipant MatchParticipant[]
-  TitlesOnUsers TitlesOnUsers[]
+  id                Int                @id @default(autoincrement())
+  email             String             @unique
+  username          String             @db.VarChar(25)	
+  salt              String
+  password          String
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  role              UserRole           @default(USER)
+  MatchParticipant  MatchParticipant[]
+  TitlesOnUsers     TitlesOnUsers[]
   Elo Elo[]
 }
 
@@ -52,10 +52,11 @@ model MatchParticipant {
 }
 
 model Elo {
-  user    User    @relation(fields: [userId], references: [id])
+  user    User                  @relation(fields: [userId], references: [id])
   userId  Int
-  gameMode    GameMode    @relation(fields: [gameModeId], references: [id])
-  gameModeId  Int
+  gameMode      GameMode        @relation(fields: [gameModeId], references: [id])
+  gameModeId    Int
+  value         Int             @default(1500)
 
   @@id([userId, gameModeId])
 }
@@ -69,18 +70,18 @@ model GameMode {
 }
 
 model Title {
-  id  Int @id @default(autoincrement())
-  value String
-  rarity  Rarity  @default(COMMON)
-  TitlesOnUsers TitlesOnUsers[]
+  id              Int               @id @default(autoincrement())
+  value           String
+  rarity          Rarity            @default(COMMON)
+  TitlesOnUsers   TitlesOnUsers[]
 }
 
 model TitlesOnUsers {
-  user  User  @relation(fields: [userId], references: [id])
-  userId  Int
-  title Title @relation(fields: [titleId], references: [id])
-  titleId Int
-  active  Boolean @default(false)
+  user                User      @relation(fields: [userId], references: [id])
+  userId              Int
+  title               Title     @relation(fields: [titleId], references: [id])
+  titleId             Int
+  active              Boolean   @default(false)
 
   @@id([userId, titleId])
 }

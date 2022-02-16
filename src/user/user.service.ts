@@ -1,28 +1,47 @@
 import { Injectable } from '@nestjs/common';
-import { Match, Prisma, Title } from '@prisma/client';
+import { Match, Prisma, Title, User } from '@prisma/client';
+import { EventEmitter2 } from 'eventemitter2';
 import { PrismaService } from 'src/prisma.service';
 import { SecurityService } from 'src/security/security.service';
 import { UserCreateDTO } from './dto/user-create.dto';
-import { UserPublic } from './dto/user-public.dto';
 
 @Injectable()
 export class UserService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly crypto: SecurityService,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
-  async create(data: UserCreateDTO): Promise<UserPublic> {
+  exclude<User, Key extends keyof User>(
+    user: User,
+    ...keys: Key[]
+  ): Omit<User, Key> {
+    for (const key of keys) {
+      delete user[key];
+    }
+    return user;
+  }
+
+  publicUser(user: User): Partial<User> {
+    return this.exclude(user, 'salt', 'password');
+  }
+
+  async create(data: UserCreateDTO): Promise<Partial<User>> {
     const encrypted = this.crypto.saltHashPassword(data.password);
     const { salt, hash: password } = encrypted;
 
-    return this.prisma.user.create({
-      data: { ...data, salt, password },
-      select: {
-        id: true,
-        username: true,
+    const user = await this.prisma.user.create({
+      data: {
+        ...data,
+        salt,
+        password,
       },
     });
+
+    const filteredUser = this.publicUser(user);
+    this.eventEmitter.emit('user.created', filteredUser);
+    return filteredUser;
   }
 
   async users(params: {
@@ -31,29 +50,27 @@ export class UserService {
     cursor?: Prisma.UserWhereUniqueInput;
     where?: Prisma.UserWhereInput;
     orderBy?: Prisma.UserOrderByWithRelationInput;
-  }): Promise<UserPublic[]> {
+  }): Promise<Partial<User>[]> {
     const { skip, take, cursor, where, orderBy } = params;
-    return this.prisma.user.findMany({
+    const users = await this.prisma.user.findMany({
       skip,
       take,
       cursor,
       where,
       orderBy,
-      select: {
-        id: true,
-        username: true,
-      },
     });
+
+    return users.map((u) => this.publicUser(u));
   }
 
-  async user(input: Prisma.UserWhereUniqueInput): Promise<UserPublic | null> {
-    return this.prisma.user.findUnique({
+  async user(
+    input: Prisma.UserWhereUniqueInput,
+  ): Promise<Partial<User> | null> {
+    const user = await this.prisma.user.findUnique({
       where: input,
-      select: {
-        id: true,
-        username: true,
-      },
     });
+
+    return this.publicUser(user);
   }
 
   async userMatches(id: string): Promise<Match[]> {

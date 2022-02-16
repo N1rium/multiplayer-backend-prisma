@@ -1,8 +1,7 @@
 import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { Match, Title } from '@prisma/client';
+import { Match, Title, User } from '@prisma/client';
 import { UserCreateDTO } from './dto/user-create.dto';
-import { UserPublic } from './dto/user-public.dto';
 import { UserService } from './user.service';
 
 @Controller('users')
@@ -11,17 +10,17 @@ export class UserController {
   constructor(private readonly service: UserService) {}
 
   @Post()
-  create(@Body() data: UserCreateDTO): Promise<UserPublic> {
+  create(@Body() data: UserCreateDTO): Promise<Partial<User>> {
     return this.service.create(data);
   }
 
   @Get()
-  users(): Promise<UserPublic[]> {
+  users(): Promise<Partial<User>[]> {
     return this.service.users({});
   }
 
   @Get('/:id')
-  user(@Param('id') id: string): Promise<UserPublic> {
+  user(@Param('id') id: string): Promise<Partial<User>> {
     return this.service.user({
       id: +id,
     });
